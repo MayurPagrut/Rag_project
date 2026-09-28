@@ -62,10 +62,23 @@ def query_rag(request: QueryRequest):
             show_retrieval=False
         )
 
+        answer = result["answer"]
+        not_found = "answer could not be found in the provided documents" in answer.lower()
+        sources = [] if not_found else [
+            {
+                "document_id": chunk.document_id,
+                "filename": chunk.filename,
+                "page_number": chunk.page_number,
+                "chunk_id": chunk.chunk_id,
+                "similarity": chunk.similarity,
+            }
+            for chunk in result["chunks"]
+        ]
+
         return {
             "question": result["question"],
-            "answer": result["answer"],
-            "sources": result["sources"]
+            "answer": answer,
+            "sources": sources
         }
 
     except Exception as exc:
